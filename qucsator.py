@@ -32,17 +32,32 @@ class Netlist:
 
             self.circuit.add(component)
 
-    def output(self, filename):
+    def __str__(self):
+        s = ""
         for c in self.circuit.components:
-            print c
+            s += ",%s" % str(c)
+        return s
+
+    def output(self, filename):
+        # TODO use 'with'?
+        file = open(filename, "w")
+        for c in self.circuit.components:
+            file.write(c.to_netlist())
+        file.close()
 
     def __init__(self, filename):
         self.circuit = None
         self.parse(filename) # sets circuit
 
 class Simulation:
-    def simulate():
-        pass
+    def simulate(self, netlist):
+        netlist_base = self.config.get("DEFAULT", "netlist_tmp_base", vars={"netlist_tmp_base": "temp"})
+        netlist_file_in = netlist_base + ".net"
+        datafile = netlist_base + ".dat"
+
+        netlist.output(netlist_file_in) # TODO mktemp?
+        subprocess.check_call([self.qucsator, "-i", netlist_file_in, "-o", datafile])
 
     def __init__(self, config):
-        self.qucsator = config.get(None, "qucsator", vars={"qucsator": "qucsator"})
+        self.qucsator = config.get("DEFAULT", "qucsator", vars={"qucsator": "qucsator"})
+        self.config = config

@@ -1,6 +1,10 @@
 class RawComponent():
     def __init__(self, str):
         self.str = str
+
+    def to_netlist(self):
+        return self.str
+
     def __str__(self):
         return "Raw: '%s'" % self.str
 
@@ -9,6 +13,9 @@ class Inductor():
         self.str = str
         self.name = name
         self.inductance = inductance
+
+    def to_netlist(self):
+        return self.str % self.inductance
 
     def __repr__(self):
         return "Inductor %s @ %s '%s'" % (self.name, self.inductance, self.str)
