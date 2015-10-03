@@ -62,7 +62,7 @@ class Simulation:
         m = re.search(regex_re, components[0])
 
         r = float(m.group(1))
-        i = 0
+
         if len(components) > 1:
             negative = (m.group(2) == '-')
             m = re.search(regex_im, components[1])
@@ -87,7 +87,6 @@ class Simulation:
 
             elif line.startswith("</indep>") or line.startswith("</dep>"):
                 self.data[current_name] = current_datalist
-                print "%s -> %s" % (current_name, str(current_datalist))
                 current_datalist = None
 
             elif line.startswith("<dep "):
