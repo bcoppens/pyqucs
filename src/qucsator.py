@@ -27,14 +27,14 @@ class Netlist:
 
                 resistance = re.search(value_regex, line).group(1)
                 meta_line = re.sub(value_regex, replace, line)
-                component = circuit.Resistor(component_name, resistance, meta_line)
+                component = circuit.Inductor(component_name, resistance, meta_line)
             elif component_type == "R":
                 value_regex = 'R="([^\"]+)"'
                 replace = 'R="%s"'
 
                 inductance = re.search(value_regex, line).group(1)
                 meta_line = re.sub(value_regex, replace, line)
-                component = circuit.Inductor(component_name, inductance, meta_line)
+                component = circuit.Resistor(component_name, inductance, meta_line)
             else:
                 component = circuit.RawComponent(line)
 
@@ -42,14 +42,14 @@ class Netlist:
 
     def __str__(self):
         s = ""
-        for c in self.circuit.components:
+        for c in self.circuit.components_ordered:
             s += ",%s" % str(c)
         return s
 
     def output(self, filename):
         # TODO use 'with'?
         file = open(filename, "w")
-        for c in self.circuit.components:
+        for c in self.circuit.components_ordered:
             file.write(c.to_netlist())
         file.close()
 
