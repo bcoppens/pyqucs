@@ -28,4 +28,5 @@ def acceptable_circuit(sim):
         return False
     return True
 
-print netlist.circuit.get_component("R1").value
+print netlist.circuit.get_component("R1").value.value
+print netlist.circuit.get_component("R1").value.suffices

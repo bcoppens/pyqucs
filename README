@@ -1,4 +1,6 @@
-A set of Python scripts to automate Qucs's simulator (Qucsator). This is just used as an attempt to play around a bit with the CAE techniques discussed in Chapter 6 of Besser & Gilmore's _Practical RF Circuit Design for Modern Wireless Systems (Volume I: Passive Circuits and Systems)_, it's nothing too serious. In a perfect world, these techniques would be integrated in Qucs itself, rather than a set of add-on scripts (which would offer many advantages) but that looked like a bit too much effort in a not-very-extensible-looking codebase (especially since it's just for my own amusement, so I can live without spending time on the GUI-part).
+A set of Python scripts to automate Qucs's simulator (Qucsator). This is just used as an attempt to play around a bit with the CAE techniques discussed in Chapter 6 of Besser & Gilmore's _Practical RF Circuit Design for Modern Wireless Systems (Volume I: Passive Circuits and Systems)_, it's nothing too serious.
+
+In a perfect world, these techniques would be integrated in Qucs itself, rather than a set of add-on scripts (which would offer many advantages). A bit like how optimalization is already implemented :) But that looked like a bit too much effort in a not-very-extensible-looking codebase (especially since it's just for my own amusement, so I can live without spending time on the GUI-part). On the other hand, parsing the netlists/etc is atrocious...
 
 Bart Coppens
 kde@bartcoppens.be

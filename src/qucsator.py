@@ -25,14 +25,14 @@ class Netlist:
                 value_regex = 'L="([^\"]+)"'
                 replace = 'L="%s"'
 
-                resistance = re.search(value_regex, line).group(1)
+                resistance = circuit.Value(re.search(value_regex, line).group(1))
                 meta_line = re.sub(value_regex, replace, line)
                 component = circuit.Inductor(component_name, resistance, meta_line)
             elif component_type == "R":
                 value_regex = 'R="([^\"]+)"'
                 replace = 'R="%s"'
 
-                inductance = re.search(value_regex, line).group(1)
+                inductance = circuit.Value(re.search(value_regex, line).group(1))
                 meta_line = re.sub(value_regex, replace, line)
                 component = circuit.Resistor(component_name, inductance, meta_line)
             else:
