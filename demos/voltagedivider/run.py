@@ -9,12 +9,14 @@ import qucsator
 config = ConfigParser.SafeConfigParser()
 config.read('pyqucs.cfg')
 
-schematic = qucsator.Schematic(config, "VoltageDivider.sch")
-schematic.to_netlist("VoltageDivider.net")
+base_file = "VoltageDivider"
 
-netlist = qucsator.Netlist("VoltageDivider.net")
+schematic = qucsator.Schematic(config, base_file + ".sch")
+schematic.to_netlist(base_file + ".net")
 
-print netlist.circuit
+netlist = qucsator.Netlist(base_file + ".net")
 
 sim = qucsator.Simulation(config)
 sim.simulate(netlist)
+
+print "Nominal Vout voltage is: %f " % sim.data["Vout.V"][0]

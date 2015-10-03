@@ -20,6 +20,16 @@ class Inductor():
     def __repr__(self):
         return "Inductor %s @ %s '%s'" % (self.name, self.inductance, self.str)
 
+class Resistor():
+    def __init__(self, name, resistance, str):
+        self.str = str
+        self.name = name
+        self.resistance = resistance
+
+    def to_netlist(self):
+        return self.str % self.resistance
+
+
 class Circuit:
     def __init__(self):
         self.components = []

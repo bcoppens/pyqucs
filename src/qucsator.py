@@ -20,11 +20,18 @@ class Netlist:
             component_name = line_s[1].split(" ")[0]
             value_regex = None
 
+            # TODO: factor out with value_regex is not None?
             if component_type == "L":
                 value_regex = 'L="([^\"]+)"'
                 replace = 'L="%s"'
 
-                # TODO: factor out with value_regex is not None?
+                resistance = re.search(value_regex, line).group(1)
+                meta_line = re.sub(value_regex, replace, line)
+                component = circuit.Resistor(component_name, resistance, meta_line)
+            elif component_type == "R":
+                value_regex = 'R="([^\"]+)"'
+                replace = 'R="%s"'
+
                 inductance = re.search(value_regex, line).group(1)
                 meta_line = re.sub(value_regex, replace, line)
                 component = circuit.Inductor(component_name, inductance, meta_line)
