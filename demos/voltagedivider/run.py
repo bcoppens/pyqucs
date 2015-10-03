@@ -1,6 +1,8 @@
 import ConfigParser
+import copy
 import sys
 
+import pyqucs
 import qucsator
 
 # run in this directory as:
@@ -28,5 +30,32 @@ def acceptable_circuit(sim):
         return False
     return True
 
-print netlist.circuit.get_component("R1").value.value
-print netlist.circuit.get_component("R1").value.suffices
+def sweep(netlist):
+    r1_start = netlist.circuit.get_component("R1").value.value
+    r2_start = netlist.circuit.get_component("R2").value.value
+
+    total   = 0
+    success = 0
+
+    print pyqucs.tolerance_range(r1_start, 10, step=0.1)
+
+    for r1 in pyqucs.tolerance_range(r1_start, 10, step=0.1):
+        for r2 in pyqucs.tolerance_range(r2_start, 10, step=0.1):
+            # TODO more efficient? :-)
+            net = copy.deepcopy(netlist)
+            net.circuit.get_component("R1").value.value = r1
+            net.circuit.get_component("R2").value.value = r2
+
+            sim.simulate(net)
+
+            total += 1
+            if acceptable_circuit(sim):
+                success += 1
+
+    return float(success) / float(total)
+
+print "Sweeping..."
+
+circuit_yield = sweep(netlist)
+
+print "Yield is %f" % circuit_yield
