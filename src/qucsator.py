@@ -50,6 +50,15 @@ class Netlist:
         self.circuit = None
         self.parse(filename) # sets circuit
 
+class Schematic:
+    def __init__(self, config, filename):
+        self.filename = filename
+        self.qucs = config.get("DEFAULT", "qucs", vars={"qucs": "qucs"})
+        self.config = config
+
+    def to_netlist(self, netlist_file):
+        subprocess.check_call([self.qucs, "--netlist", "-i", self.filename, "-o", netlist_file])
+
 class Simulation:
     def parse_datapoint(self, line):
         # Horrible format
