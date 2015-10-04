@@ -57,10 +57,6 @@ def sweep(netlist):
 
     return float(success) / float(total)
 
-print "Computing original yield..."
-circuit_yield = sweep(netlist)
-print "Yield is %f" % circuit_yield
-
 def sensitivity(netlist, component_name, sweep_components, trials_per_value):
     net = copy.deepcopy(netlist)
 
@@ -81,25 +77,43 @@ def sensitivity(netlist, component_name, sweep_components, trials_per_value):
             if acceptable_circuit(sim):
                 ok_samples.append(comp_val) # TODO: this is probably not ideal :)
 
-    count, bins, ignored = plot.hist(ok_samples, 10, histtype='bar')
-    plot.xlim(min(bins), max(bins))
+    return ok_samples
+
+
+def plot_2_sensitivities(data_r1, data_r2):
+    f, (ax1, ax2) = plot.subplots(1, 2, sharey=True)
+    ax1.hist(data_r1, 10, histtype='bar')
+    ax1.set_title('R1')
+
+    ax2.hist(data_r2, 10, histtype='bar')
+    ax2.set_title('R2')
+
     plot.show()
 
-print "Computing and showing sensitivity of R1"
-#sensitivity(netlist, "R1", ["R2"], 100)
 
-print "Computing and showing sensitivity of R2"
-#sensitivity(netlist, "R2", ["R1"], 100)
+print "Computing original yield..."
+circuit_yield = sweep(netlist)
+print "Yield is %f" % circuit_yield
+
+print "Computing sensitivity of R1"
+data_r1 = sensitivity(netlist, "R1", ["R2"], 100)
+
+print "Computing sensitivity of R2"
+data_r2 = sensitivity(netlist, "R2", ["R1"], 100)
+
+plot_2_sensitivities(data_r1, data_r2)
 
 
 print "Setting R2 to 27 and doing sensitivity again..."
 netlist.circuit.get_component("R2").value.value = 27
 
-print "Computing and showing sensitivity of R1"
-#sensitivity(netlist, "R1", ["R2"], 100)
+print "Computing sensitivity of R1"
+data_r1 = sensitivity(netlist, "R1", ["R2"], 100)
 
-print "Computing and showing sensitivity of R2"
-#sensitivity(netlist, "R2", ["R1"], 100)
+print "Computing sensitivity of R2"
+data_r2 = sensitivity(netlist, "R2", ["R1"], 100)
+
+plot_2_sensitivities(data_r1, data_r2)
 
 print "Computing final yield..."
 circuit_yield = sweep(netlist)
