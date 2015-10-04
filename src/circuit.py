@@ -16,6 +16,7 @@ class SimpleComponent():
         self.str = str
         self.name = name
         self.value = value
+        self.tolerance = 10 # a default value, TODO: should this be set everywhere? Probably...
 
     def to_netlist(self):
         return self.str % self.value.to_netlist()

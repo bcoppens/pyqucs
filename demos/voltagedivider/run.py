@@ -31,20 +31,21 @@ def acceptable_circuit(sim):
     return True
 
 def sweep(netlist):
-    r1_start = netlist.circuit.get_component("R1").value.value
-    r2_start = netlist.circuit.get_component("R2").value.value
-
     total   = 0
     success = 0
 
-    print pyqucs.tolerance_range(r1_start, 10, step=0.1)
+    net = copy.deepcopy(netlist)
 
-    for r1 in pyqucs.tolerance_range(r1_start, 10, step=0.1):
-        for r2 in pyqucs.tolerance_range(r2_start, 10, step=0.1):
-            # TODO more efficient? :-)
-            net = copy.deepcopy(netlist)
-            net.circuit.get_component("R1").value.value = r1
-            net.circuit.get_component("R2").value.value = r2
+    r1 = net.circuit.get_component("R1")
+    r2 = net.circuit.get_component("R2")
+
+    #print pyqucs.sample_component(r1, 70)
+
+    # These come from the original netlist, so we do not sample over the updated values :-)
+    for r1_val in pyqucs.sample_component(netlist.circuit.get_component("R1"), 70):
+        for r2_val in pyqucs.sample_component(netlist.circuit.get_component("R2"), 70):
+            r1.value.value = r1_val
+            r2.value.value = r2_val
 
             sim.simulate(net)
 
