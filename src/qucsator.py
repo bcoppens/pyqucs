@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 
@@ -5,6 +6,9 @@ import circuit
 
 # This entire file is hacky as hell! The way these files are 'parsed' is totally fragile. On the other hand, the 'formats' are not really well-defined to start with
 # This works for Qucs 0.0.19 (some git checkout)
+
+# TODO: Python 3.4 has subprocess.DEVNULL
+DEVNULL = open(os.devnull, 'wb')
 
 class Netlist:
     def parse(self, filename):
@@ -64,7 +68,7 @@ class Schematic:
         self.config = config
 
     def to_netlist(self, netlist_file):
-        subprocess.check_call([self.qucs, "--netlist", "-i", self.filename, "-o", netlist_file])
+        subprocess.check_call([self.qucs, "--netlist", "-i", self.filename, "-o", netlist_file], stdout=DEVNULL, stderr=DEVNULL)
 
 class Simulation:
     def parse_datapoint(self, line):
@@ -123,7 +127,7 @@ class Simulation:
         datafile = netlist_base + ".dat"
 
         netlist.output(netlist_file_in) # TODO mktemp?
-        subprocess.check_call([self.qucsator, "-i", netlist_file_in, "-o", datafile])
+        subprocess.check_call([self.qucsator, "-i", netlist_file_in, "-o", datafile], stdout=DEVNULL, stderr=DEVNULL)
 
         self.read_from_datafile(datafile)
 
