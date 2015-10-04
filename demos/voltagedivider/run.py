@@ -2,6 +2,8 @@ import ConfigParser
 import copy
 import sys
 
+import matplotlib.pyplot as plot
+
 import pyqucs
 import qucsator
 
@@ -55,8 +57,50 @@ def sweep(netlist):
 
     return float(success) / float(total)
 
-print "Sweeping..."
-
+print "Computing original yield..."
 circuit_yield = sweep(netlist)
+print "Yield is %f" % circuit_yield
 
+def sensitivity(netlist, component_name, sweep_components, trials_per_value):
+    net = copy.deepcopy(netlist)
+
+    original_component = netlist.circuit.get_component(component_name)
+    component = net.circuit.get_component(component_name)
+
+    ok_samples = []
+
+    for comp_val in pyqucs.equally_spaced(original_component, 20):
+        component.value.value = comp_val
+
+        for i in range(0, trials_per_value):
+            for other in sweep_components:
+                pyqucs.set_component_to_random_sample(netlist, net, other)
+
+            sim.simulate(net)
+
+            if acceptable_circuit(sim):
+                ok_samples.append(comp_val) # TODO: this is probably not ideal :)
+
+    count, bins, ignored = plot.hist(ok_samples, 10, histtype='bar')
+    plot.xlim(min(bins), max(bins))
+    plot.show()
+
+print "Computing and showing sensitivity of R1"
+#sensitivity(netlist, "R1", ["R2"], 100)
+
+print "Computing and showing sensitivity of R2"
+#sensitivity(netlist, "R2", ["R1"], 100)
+
+
+print "Setting R2 to 27 and doing sensitivity again..."
+netlist.circuit.get_component("R2").value.value = 27
+
+print "Computing and showing sensitivity of R1"
+#sensitivity(netlist, "R1", ["R2"], 100)
+
+print "Computing and showing sensitivity of R2"
+#sensitivity(netlist, "R2", ["R1"], 100)
+
+print "Computing final yield..."
+circuit_yield = sweep(netlist)
 print "Yield is %f" % circuit_yield

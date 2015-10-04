@@ -25,6 +25,15 @@ def sample_component(component, nr_samples):
     sampler = getattr(component, "distribution", uniform)
     return sampler(component, nr_samples)
 
+# TODO: this with the original and new netlist is horrible, components should keep track of their nominal value for cases such as this!
+def set_component_to_random_sample(original_netlist, new_netlist, component_name):
+    original = original_netlist.circuit.get_component(component_name)
+    new = new_netlist.circuit.get_component(component_name)
+
+    sampler = getattr(original, "distribution", uniform)
+
+    new.value.value = sampler(original, 1)[0]
+
 if __name__ == "__main__":
     config = ConfigParser.SafeConfigParser()
     config.read('pyqucs.cfg')
