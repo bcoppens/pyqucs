@@ -63,10 +63,13 @@ def sensitivity(netlist, component_name, sweep_components, trials_per_value):
     original_component = netlist.circuit.get_component(component_name)
     component = net.circuit.get_component(component_name)
 
-    ok_samples = []
+    x_vals = []
+    y_vals = []
 
     for comp_val in pyqucs.equally_spaced(original_component, 20):
         component.value.value = comp_val
+
+        success = 0
 
         for i in range(0, trials_per_value):
             for other in sweep_components:
@@ -75,17 +78,22 @@ def sensitivity(netlist, component_name, sweep_components, trials_per_value):
             sim.simulate(net)
 
             if acceptable_circuit(sim):
-                ok_samples.append(comp_val) # TODO: this is probably not ideal :)
+                success += 1
+        x_vals.append(comp_val)
+        y_vals.append(float(success)/float(trials_per_value))
 
-    return ok_samples
+    return (x_vals, y_vals)
 
 
 def plot_2_sensitivities(data_r1, data_r2):
     f, (ax1, ax2) = plot.subplots(1, 2, sharey=True)
-    ax1.hist(data_r1, 10, histtype='bar')
+
+    width = data_r1[0][1] - data_r1[0][0]
+
+    ax1.bar(data_r1[0], data_r1[1], width=width)
     ax1.set_title('R1')
 
-    ax2.hist(data_r2, 10, histtype='bar')
+    ax2.bar(data_r2[0], data_r2[1], width=width)
     ax2.set_title('R2')
 
     plot.show()
