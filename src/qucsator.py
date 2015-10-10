@@ -24,28 +24,24 @@ class Netlist:
             component_name = line_s[1].split(" ")[0]
             value_regex = None
 
-            # TODO: factor out with value_regex is not None?
+            # These simple passive component definitions all have form for what we're interested in
             if component_type == "L":
                 value_regex = 'L="([^\"]+)"'
                 replace = 'L="%s"'
-
-                resistance = circuit.Value(re.search(value_regex, line).group(1))
-                meta_line = re.sub(value_regex, replace, line)
-                component = circuit.Inductor(component_name, resistance, meta_line)
+                type = circuit.Inductor
             elif component_type == "R":
                 value_regex = 'R="([^\"]+)"'
                 replace = 'R="%s"'
-
-                inductance = circuit.Value(re.search(value_regex, line).group(1))
-                meta_line = re.sub(value_regex, replace, line)
-                component = circuit.Resistor(component_name, inductance, meta_line)
+                type = circuit.Resistor
             elif component_type == "C":
                 value_regex = 'C="([^\"]+)"'
                 replace = 'C="%s"'
+                type = circuit.Capacitor
 
-                capacitance = circuit.Value(re.search(value_regex, line).group(1))
+            if value_regex is not None:
+                value = circuit.Value(re.search(value_regex, line).group(1))
                 meta_line = re.sub(value_regex, replace, line)
-                component = circuit.Capacitor(component_name, capacitance, meta_line)
+                component = type(component_name, value, meta_line)
             else:
                 component = circuit.RawComponent(line)
 
