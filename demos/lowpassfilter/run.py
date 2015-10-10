@@ -54,7 +54,7 @@ def acceptable_circuit(sim):
                 return False
     return True
 
-def sample(netlist, components, nr_trials):
+def sample(netlist, components, nr_trials, callback=None):
     success = 0
 
     net = copy.deepcopy(netlist)
@@ -65,19 +65,39 @@ def sample(netlist, components, nr_trials):
 
         sim.simulate(net)
 
+        if callback is not None:
+            callback(sim)
+
         if acceptable_circuit(sim):
             success += 1
 
     #...
     return float(success) / float(nr_trials)
 
-#plot.plot(sim.data["frequency"], sim.data["dBS21"])
-#plot.ylim(-2, 0)
-#plot.show()
+# TODO: more flexible, make configurable to only keep a subset, for example only dbS21 and S[1,1] or so
+class DataKeeper():
+    def __init__(self):
+        self.datasets = []
+    def __call__(self, sim):
+        self.datasets.append(sim.data)
 
 print "Original acceptable? ..."
 print acceptable_circuit(sim)
 
+orig_data = sim.data["frequency"], sim.data["dBS21"]
+
 print "Sampling 100..."
-percent_ok = sample(netlist, ["C1", "C5", "L2", "L4", "C3"], 100)
+
+datakeeper = DataKeeper()
+
+percent_ok = sample(netlist, ["C1", "C5", "L2", "L4", "C3"], 100, callback=datakeeper)
+
 print "%f %% OK" % (100.0*percent_ok)
+
+for dataset in datakeeper.datasets:
+    plot.plot(dataset["frequency"], dataset["dBS21"], color='grey', alpha=0.5, marker=None, hold=True)
+
+plot.plot(orig_data[0], orig_data[1], color='black', marker='.', hold=True)
+
+plot.ylim(-2, 0)
+plot.show()
