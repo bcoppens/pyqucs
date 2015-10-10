@@ -19,6 +19,13 @@ def uniform(component, nr_samples):
     range = tolerance_range(component)
     return np.random.uniform(range[0], range[1], nr_samples)
 
+# TODO: should this actually mean it is actually a normal but 'cut off' around +/- tolerance?
+def normal(component, sigma, nr_samples):
+    return np.random.normal(component.value.value, sigma, nr_samples)
+
+def create_normal(sigma):
+    return lambda component, nr_samples: normal(component, sigma, nr_samples)
+
 def sample_component(component, nr_samples):
     # TODO: perhaps this should simple be set in all components
     #sampler = getattr(component, "distribution", equally_spaced)
