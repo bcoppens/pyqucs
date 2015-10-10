@@ -3,6 +3,7 @@ import copy
 import sys
 
 import matplotlib.pyplot as plot
+from matplotlib.ticker import MultipleLocator
 
 import pyqucs
 import qucsator
@@ -94,10 +95,17 @@ percent_ok = sample(netlist, ["C1", "C5", "L2", "L4", "C3"], 100, callback=datak
 
 print "%f %% OK" % (100.0*percent_ok)
 
+fig, axes = plot.subplots()
+
 for dataset in datakeeper.datasets:
     plot.plot(dataset["frequency"], dataset["dBS21"], color='grey', alpha=0.5, marker=None, hold=True)
 
 plot.plot(orig_data[0], orig_data[1], color='black', marker='.', hold=True)
 
 plot.ylim(-2, 0)
+
+minorLocator = MultipleLocator(0.25)
+axes.yaxis.set_minor_locator(minorLocator)
+axes.xaxis.grid(True, which='minor')
+
 plot.show()
