@@ -1,6 +1,6 @@
 <Qucs Schematic 0.0.19>
 <Properties>
-  <View=11,-11,1304,1829,1,0,0>
+  <View=11,49,1304,1829,1,0,720>
   <Grid=10,10,1>
   <DataSet=LowPassFilter.dat>
   <DataDisplay=LowPassFilter.dpl>

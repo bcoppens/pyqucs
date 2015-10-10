@@ -14,24 +14,32 @@ import qucsator
 config = ConfigParser.SafeConfigParser()
 config.read('pyqucs.cfg')
 
-base_file = "LowPassFilter"
+# TODO: automatically generate the LowPassFilter from LowPassFilterOriginal :)
+base_file_original = "LowPassFilterOriginal"
+base_file_modified = "LowPassFilter"
 
-schematic = qucsator.Schematic(config, base_file + ".sch")
-schematic.to_netlist(base_file + ".net")
+schematic_original = qucsator.Schematic(config, base_file_original + ".sch")
+schematic_original.to_netlist(base_file_original+ ".net")
 
-netlist = qucsator.Netlist(base_file + ".net")
+schematic = qucsator.Schematic(config, base_file_modified + ".sch")
+schematic.to_netlist(base_file_modified + ".net")
+
+netlist_original = qucsator.Netlist(base_file_original + ".net")
+netlist = qucsator.Netlist(base_file_modified + ".net")
 
 # Set tolerances and distributions
 for (components, tolerance, distribution) in [ ( ["C1", "C5"], 5, pyqucs.create_normal(0.18) ),
                                                ( ["L2", "L4"], 5, pyqucs.uniform ),
                                                ( ["C3"],       5, pyqucs.create_normal(0.29) ) ]:
     for c in components:
-        comp = netlist.circuit.get_component(c)
-        comp.tolerance = tolerance
-        comp.distribution = distribution
+        for n in [ netlist, netlist_original ]:
+            comp = netlist.circuit.get_component(c)
+            comp.tolerance = tolerance
+            comp.distribution = distribution
 
 sim = qucsator.Simulation(config)
-sim.simulate(netlist)
+
+sim.simulate(netlist_original)
 
 #print sim.data
 
