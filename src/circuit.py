@@ -32,7 +32,16 @@ class Value:
         # TODO: parse pico/femto, etc, sigh
         # TODO: this should just parse a %f + p|n|f|m|etc Ohm|etc?
         s = str.split(" ") # TODO very poor man's parsing, but suffices for now
-        self.value = float(s[0])
+
+        # TODO: with a regex, perhaps? But this definitely suffices for now
+        try:
+            self.value = float(s[0])
+            self.symbolic = False
+        except ValueError:
+            # It wasn't a valid floating point value, so assume it's a symbolic reference
+            self.value = s[0]
+            self.symbolic = True
+
         self.suffices = s[1:]
     def to_netlist(self):
         return " ".join([str(self.value)] + self.suffices)
