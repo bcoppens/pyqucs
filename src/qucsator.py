@@ -24,21 +24,13 @@ class Netlist:
             component_name = line_s[1].split(" ")[0]
             value_regex = None
 
-            # These simple passive component definitions all have form for what we're interested in
-            if component_type == "L":
-                value_regex = 'L="([^\"]+)"'
-                replace = 'L="%s"'
-                type = circuit.Inductor
-            elif component_type == "R":
-                value_regex = 'R="([^\"]+)"'
-                replace = 'R="%s"'
-                type = circuit.Resistor
-            elif component_type == "C":
-                value_regex = 'C="([^\"]+)"'
-                replace = 'C="%s"'
-                type = circuit.Capacitor
+            # These simple passive component definitions all have the same form for what we're interested in
+            simple_models = { "C": circuit.Capacitor, "L": circuit.Inductor, "R": circuit.Resistor  }
+            if component_type in simple_models:
+                value_regex = '%s="([^\"]+)"' % component_type
+                replace = '%s="%%s"' % component_type # => "R=%s" for example
+                type = simple_models[component_type]
 
-            if value_regex is not None:
                 value = circuit.Value(re.search(value_regex, line).group(1))
                 meta_line = re.sub(value_regex, replace, line)
                 component = type(component_name, value, meta_line)
