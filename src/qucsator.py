@@ -71,15 +71,18 @@ class Simulation:
         #   -3.3e+01
         #   -1.2e-01-j8.4e-02
 
-        regex_re = "([+-]\d+.\d+e[+-]\d+)([+-]?)" # The last group matches the sign of the imaginary part, if any
-        regex_im = "(\d+.\d+e[+-]\d+)"
+        regex_re = "([+-])(\d+.\d+e[+-]\d+|inf|nan)([+-]?)" # The last group matches the sign of the imaginary part, if any
+        regex_im = "(\d+.\d+e[+-]\d+|inf|nan)"
         components = line.split("j")
         m = re.search(regex_re, components[0])
 
-        r = float(m.group(1))
+        r = float(m.group(2))
+        negative = (m.group(1) == '-')
+        if negative:
+            r = -r
 
         if len(components) > 1:
-            negative = (m.group(2) == '-')
+            negative = (m.group(3) == '-')
             m = re.search(regex_im, components[1])
             i = float(m.group(1))
             if negative:
