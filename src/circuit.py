@@ -24,6 +24,9 @@ class SimpleComponent():
 class Inductor(SimpleComponent):
     pass
 
+class Capacitor(SimpleComponent):
+    pass
+
 class Resistor(SimpleComponent):
     pass
 

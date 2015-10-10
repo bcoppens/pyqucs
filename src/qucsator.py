@@ -39,6 +39,13 @@ class Netlist:
                 inductance = circuit.Value(re.search(value_regex, line).group(1))
                 meta_line = re.sub(value_regex, replace, line)
                 component = circuit.Resistor(component_name, inductance, meta_line)
+            elif component_type == "C":
+                value_regex = 'C="([^\"]+)"'
+                replace = 'C="%s"'
+
+                capacitance = circuit.Value(re.search(value_regex, line).group(1))
+                meta_line = re.sub(value_regex, replace, line)
+                component = circuit.Capacitor(component_name, inductance, meta_line)
             else:
                 component = circuit.RawComponent(line)
 
