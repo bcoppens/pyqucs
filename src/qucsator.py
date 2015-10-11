@@ -31,9 +31,13 @@ class Netlist:
                 replace = '%s="%%s"' % component_type # => "R=%s" for example
                 type = simple_models[component_type]
 
+                # TODO: check that this is ok for polarized caps
+                params = line_s[1].split(" ")
+
                 value = circuit.Value(re.search(value_regex, line).group(1))
                 meta_line = re.sub(value_regex, replace, line)
-                component = type(component_name, value, meta_line)
+                meta_line = re.sub("^(%s:[^ ]+) ([^ ]+) ([^ ]+)" % component_type, "\\1 %s %s", meta_line) # Make the netlist names replacable
+                component = type(component_name, value, meta_line, port1=params[1], port2=params[2])
             else:
                 component = circuit.RawComponent(line)
 

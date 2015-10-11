@@ -12,14 +12,18 @@ class RawComponent():
         return "Raw: '%s'" % self.str
 
 class SimpleComponent():
-    def __init__(self, name, value, str):
+    def __init__(self, name, value, str, port1, port2):
         self.str = str
         self.name = name
         self.value = value
+
+        self.port1 = port1
+        self.port2 = port2
+
         self.tolerance = 10 # a default value, TODO: should this be set everywhere? Probably...
 
     def to_netlist(self):
-        return self.str % self.value.to_netlist()
+        return self.str % (self.port1, self.port2, self.value.to_netlist())
 
 class Inductor(SimpleComponent):
     pass
