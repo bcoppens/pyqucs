@@ -5,6 +5,8 @@ import sys
 import matplotlib.pyplot as plot
 from matplotlib.ticker import MultipleLocator
 
+import circuit
+import physical
 import pyqucs
 import qucsator
 
@@ -37,12 +39,11 @@ for (components, tolerance, distribution) in [ ( ["C1", "C5"], 5, pyqucs.create_
             comp.tolerance = tolerance
             comp.distribution = distribution
 
-sim = qucsator.Simulation(config)
-
-sim.simulate(netlist_original)
-
-#print sim.data
-
+# Now make this physical
+netlist_realisation = copy.deepcopy(netlist_original)
+for c in ["C1", "C3", "C5"]:
+    # Use on purpose a more leaky capacitor, so the difference shows up in the graphs :)
+    physical.model_capacitor(netlist_realisation, c, R_L = circuit.Value("10 k"), R_ESR = circuit.Value("0"), L_ESL = circuit.Value("0"))
 
 # TODO: look at the trick from the qucs test cases to wrap the simulation data into multi-dimensional arrays?
 
@@ -90,10 +91,17 @@ class DataKeeper():
     def __call__(self, sim):
         self.datasets.append(sim.data)
 
+sim = qucsator.Simulation(config)
+
 print "Original acceptable? ..."
+sim.simulate(netlist_original)
 print acceptable_circuit(sim)
 
 orig_data = sim.data["frequency"], sim.data["dBS21"]
+
+print "More physical model..."
+sim.simulate(netlist_realisation)
+realisation_data = sim.data["frequency"], sim.data["dBS21"]
 
 print "Sampling 100..."
 
@@ -109,6 +117,7 @@ for dataset in datakeeper.datasets:
     plot.plot(dataset["frequency"], dataset["dBS21"], color='grey', alpha=0.5, marker=None, hold=True)
 
 plot.plot(orig_data[0], orig_data[1], color='black', marker='.', hold=True)
+plot.plot(realisation_data[0], realisation_data[1], color='blue', marker='.', hold=True)
 
 plot.ylim(-2, 0)
 

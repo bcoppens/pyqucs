@@ -23,16 +23,17 @@ class SimpleComponent():
         self.tolerance = 10 # a default value, TODO: should this be set everywhere? Probably...
 
     def to_netlist(self):
-        return self.str % (self.port1, self.port2, self.value.to_netlist())
+        return self.str % (self.port1, self.port2, self.value.to_netlist()) # TODO: include self.name
 
 class Inductor(SimpleComponent):
-    pass
+    # TODO have a different variant of the constructor that uses the base_string
+    base_string = 'L:%s %%s %%s L="%%s"\n' # All the other properties are optional, leave those for now
 
 class Capacitor(SimpleComponent):
-    pass
+    base_string = 'C:%s %%s %%s C="%%s"\n' # All the other properties are optional, leave those for now
 
 class Resistor(SimpleComponent):
-    pass
+    base_string = 'R:%s %%s %%s R="%%s"\n' # All the other properties are optional, leave those for now
 
 class Value:
     def __init__(self, str):
@@ -58,9 +59,21 @@ class Circuit:
         self.components_ordered = []
         self.components = {}
 
+        self.internal_names = {} # map prefix -> highest id
+
     def add(self, component):
         self.components_ordered.append(component)
         self.components[component.name] = component
+
+    def next_internal_name_for(self, prefix):
+        if prefix in self.internal_names:
+            next = self.internal_names[prefix] + 1
+        else:
+            next = 0
+
+        self.internal_names[prefix] = next
+
+        return "%s_pyqucs_internal_%i" % (prefix, next)
 
     def __str__(self):
         return str(self.components)
