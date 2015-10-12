@@ -36,7 +36,7 @@ for (components, tolerance, distribution) in [ ( ["C1", "C5"], 5, pyqucs.create_
     for c in components:
         for n in [ netlist, netlist_original ]:
             comp = netlist.circuit.get_component(c)
-            comp.tolerance = tolerance
+            comp.value.tolerance = tolerance
             comp.distribution = distribution
 
 # Now make this physical

@@ -20,6 +20,10 @@ schematic.to_netlist(base_file + ".net")
 
 netlist = qucsator.Netlist(base_file + ".net")
 
+# Set some tolerances that we'll be using later
+for r in ["R1", "R2"]:
+    netlist.circuit.get_component(r).value.tolerance = 10
+
 sim = qucsator.Simulation(config)
 sim.simulate(netlist)
 

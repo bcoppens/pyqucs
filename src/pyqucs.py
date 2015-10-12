@@ -6,7 +6,7 @@ import qucsator
 
 def tolerance_range(component):
     component_value = component.value.value
-    delta = component_value * float(component.tolerance) / 100.0
+    delta = component_value * float(component.value.tolerance) / 100.0
     return (component_value - delta, component_value + delta)
 
 # TODO: factor the range = ... out?

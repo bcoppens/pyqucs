@@ -20,8 +20,6 @@ class SimpleComponent():
         self.port1 = port1
         self.port2 = port2
 
-        self.tolerance = 10 # a default value, TODO: should this be set everywhere? Probably...
-
     def to_netlist(self):
         return self.str % (self.port1, self.port2, self.value.to_netlist()) # TODO: include self.name
 
@@ -36,10 +34,12 @@ class Resistor(SimpleComponent):
     base_string = 'R:%s %%s %%s R="%%s"\n' # All the other properties are optional, leave those for now
 
 class Value:
-    def __init__(self, str):
+    def __init__(self, str, tolerance=0):
         # TODO: parse pico/femto, etc, sigh
         # TODO: this should just parse a %f + p|n|f|m|etc Ohm|etc?
         s = str.split(" ") # TODO very poor man's parsing, but suffices for now
+
+        self.tolerance = tolerance
 
         # TODO: with a regex, perhaps? But this definitely suffices for now
         try:
