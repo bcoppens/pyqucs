@@ -12,7 +12,13 @@ class RawComponent():
         return "Raw: '%s'" % self.str
 
 class SimpleComponent():
+    # All the other properties are optional, so leave those out for now. Subclasses should override this once optional parameters
+    # are supported that differ across components, and I should probably define some kind of setter-method rather than hardcode it in the constructor
+    base_string = '%s:%s %%s %%s %s="%%s"\n'
+
     def __init__(self, name, value, str, port1, port2):
+        if str is None:
+            str = self.base_string % (self.component_symbol, name, self.component_symbol) # For a resistor, this translates to 'R:name %s %s R="%s"'
         self.str = str
         self.name = name
         self.value = value
@@ -24,14 +30,13 @@ class SimpleComponent():
         return self.str % (self.port1, self.port2, self.value.to_netlist()) # TODO: include self.name
 
 class Inductor(SimpleComponent):
-    # TODO have a different variant of the constructor that uses the base_string
-    base_string = 'L:%s %%s %%s L="%%s"\n' # All the other properties are optional, leave those for now
+    component_symbol = "L"
 
 class Capacitor(SimpleComponent):
-    base_string = 'C:%s %%s %%s C="%%s"\n' # All the other properties are optional, leave those for now
+    component_symbol = "C"
 
 class Resistor(SimpleComponent):
-    base_string = 'R:%s %%s %%s R="%%s"\n' # All the other properties are optional, leave those for now
+    component_symbol = "R"
 
 class Value:
     def __init__(self, str, tolerance=0):
