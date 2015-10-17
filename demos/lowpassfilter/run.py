@@ -67,13 +67,13 @@ def acceptable_circuit(sim):
 def sample(netlist, components, nr_trials, callback=None):
     success = 0
 
-    net = copy.deepcopy(netlist)
+    sampled_net = pyqucs.netlist_for_sampling(netlist)
 
     for trial in range(0, nr_trials):
         for comp in components:
-            pyqucs.set_component_to_random_sample(netlist, net, comp)
+            pyqucs.set_component_to_random_sample(sampled_net, comp)
 
-        sim.simulate(net)
+        sim.simulate(sampled_net)
 
         if callback is not None:
             callback(sim)

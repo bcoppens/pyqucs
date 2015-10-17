@@ -1,9 +1,14 @@
+import copy
 import re
 
 class RawComponent():
     def __init__(self, str):
         self.name = "<RAW_COMPONENT>"
         self.str = str
+
+    # See the comment at the top of pyqucs.py
+    def initialize_nominal_value(self):
+        pass
 
     def to_netlist(self):
         return self.str
@@ -16,12 +21,16 @@ class SimpleComponent():
     # are supported that differ across components, and I should probably define some kind of setter-method rather than hardcode it in the constructor
     base_string = '%s:%s %%s %%s %s="%%s"\n'
 
+    def initialize_nominal_value(self):
+        self.nominal_value = copy.deepcopy(self.value) # TODO, sigh
+
     def __init__(self, name, value, str, port1, port2):
         if str is None:
             str = self.base_string % (self.component_symbol, name, self.component_symbol) # For a resistor, this translates to 'R:name %s %s R="%s"'
         self.str = str
         self.name = name
         self.value = value
+        self.nominal_value = None
 
         self.port1 = port1
         self.port2 = port2

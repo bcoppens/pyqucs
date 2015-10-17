@@ -40,20 +40,15 @@ def sweep(netlist):
     total   = 0
     success = 0
 
-    net = copy.deepcopy(netlist)
+    sampled_net = pyqucs.netlist_for_sampling(netlist)
 
-    r1 = net.circuit.get_component("R1")
-    r2 = net.circuit.get_component("R2")
+    for r1_range in range(0,70):
+        pyqucs.set_component_to_random_sample(sampled_net, "R1")
 
-    #print pyqucs.sample_component(r1, 70)
+        for r2_range in range(0,70):
+            pyqucs.set_component_to_random_sample(sampled_net, "R2")
 
-    # These come from the original netlist, so we do not sample over the updated values :-)
-    for r1_val in pyqucs.sample_component(netlist.circuit.get_component("R1"), 70):
-        for r2_val in pyqucs.sample_component(netlist.circuit.get_component("R2"), 70):
-            r1.value.value = r1_val
-            r2.value.value = r2_val
-
-            sim.simulate(net)
+            sim.simulate(sampled_net)
 
             total += 1
             if acceptable_circuit(sim):
@@ -62,24 +57,29 @@ def sweep(netlist):
     return float(success) / float(total)
 
 def sensitivity(netlist, component_name, sweep_components, trials_per_value):
+    # This is needed in addition to the set_component_to_random_sample, because I want to sweep over the component values, updating their nominal values
     net = copy.deepcopy(netlist)
 
-    original_component = netlist.circuit.get_component(component_name)
     component = net.circuit.get_component(component_name)
+
+    sampled_net_component = pyqucs.netlist_for_sampling(net) # Because equally_spaced needs a netlist_for_sampling, meh. TODO
+    sampled_component = sampled_net_component.circuit.get_component(component_name)
 
     x_vals = []
     y_vals = []
 
-    for comp_val in pyqucs.equally_spaced(original_component, 20):
+    for comp_val in pyqucs.equally_spaced(sampled_component, 20): # This range is created before the component value is updated
         component.value.value = comp_val
+
+        sampled_net = pyqucs.netlist_for_sampling(net)
 
         success = 0
 
         for i in range(0, trials_per_value):
             for other in sweep_components:
-                pyqucs.set_component_to_random_sample(netlist, net, other)
+                pyqucs.set_component_to_random_sample(sampled_net, other)
 
-            sim.simulate(net)
+            sim.simulate(sampled_net)
 
             if acceptable_circuit(sim):
                 success += 1
