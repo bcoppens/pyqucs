@@ -45,6 +45,9 @@ for c in ["C1", "C3", "C5"]:
     # Use on purpose a more leaky capacitor, so the difference shows up in the graphs :)
     physical.model_capacitor(netlist_realisation, c, R_L = circuit.Value("10 k"), R_ESR = circuit.Value("0"), L_ESL = circuit.Value("0"))
 
+for l in ["L2", "L4"]:
+    physical.model_inductor(netlist_realisation, l, R_P = circuit.Value("100 M"), R_S = circuit.Value("0"), C_P = circuit.Value("0"))
+
 # TODO: look at the trick from the qucs test cases to wrap the simulation data into multi-dimensional arrays?
 
 def acceptable_circuit(sim):
