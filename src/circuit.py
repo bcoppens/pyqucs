@@ -47,26 +47,47 @@ class Capacitor(SimpleComponent):
 class Resistor(SimpleComponent):
     component_symbol = "R"
 
+unitprefixes = { "E": 1e+18, "P": 1e+15, "T": 1e+12, "G": 1e+09, "M": 1e+06, "k": 1e+03, "m": 1e-03, "u": 1e-06, "n": 1e-09, "p": 1e-12, "f": 1e-15 }
+units = set({"S", "s", "K", "H", "F", "Hz", "V", "A", "W", "m"})
+
 class Value:
     def __init__(self, str, tolerance=0):
-        # TODO: parse pico/femto, etc, sigh
-        # TODO: this should just parse a %f + p|n|f|m|etc Ohm|etc?
-        s = str.split(" ") # TODO very poor man's parsing, but suffices for now
+        # TODO very poor man's parsing, but suffices for now, in the end I might want to make an actual parser here
+        # This means that the suffixes should be split from the value by spaces for now...
+        s = str.split(" ")
 
         self.tolerance = tolerance
 
         # TODO: with a regex, perhaps? But this definitely suffices for now
         try:
+            self.unit = ""
+            self.prefix = ""
             self.value = float(s[0])
+
+            # Try to parse some suffixes. Doesn't parse them all, though... (in particular, when a unit partially prefix overlaps with a unit, like f(emto) and f(eet) TODO?)
+            suffixes = "".join(s[1:])
+            for pos, char in enumerate(suffixes):
+
+                # For now, this allows for multiple unit prefixes and units combined...
+                if char == "O" and suffixes[pos:pos+3] == "Ohm":
+                    self.unit = "Ohm"
+                elif char == "H" and suffixes[pos:pos+2] == "Hz":
+                    self.unit = "Hz"
+                elif char in unitprefixes:
+                    self.prefix = char
+                elif char in units:
+                    self.unit = char
+                else:
+                    print "Warning: Unknown suffix '%s' in '%s'" % (char, str)
+
             self.symbolic = False
         except ValueError:
             # It wasn't a valid floating point value, so assume it's a symbolic reference
-            self.value = s[0]
+            self.value = str
             self.symbolic = True
 
-        self.suffices = s[1:]
     def to_netlist(self):
-        return " ".join([str(self.value)] + self.suffices)
+        return " ".join([str(self.value)] + [self.prefix, self.unit])
 
 class Circuit:
     def __init__(self):
