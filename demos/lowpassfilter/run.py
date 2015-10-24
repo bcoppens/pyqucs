@@ -18,24 +18,19 @@ config.read('pyqucs.cfg')
 
 # TODO: automatically generate the LowPassFilter from LowPassFilterOriginal :)
 base_file_original = "LowPassFilterOriginal"
-base_file_modified = "LowPassFilter"
 
 schematic_original = qucsator.Schematic(config, base_file_original + ".sch")
 schematic_original.to_netlist(base_file_original+ ".net")
 
-schematic = qucsator.Schematic(config, base_file_modified + ".sch")
-schematic.to_netlist(base_file_modified + ".net")
-
 netlist_original = qucsator.Netlist(base_file_original + ".net")
-netlist = qucsator.Netlist(base_file_modified + ".net")
 
 # Set tolerances and distributions
 for (components, tolerance, distribution) in [ ( ["C1", "C5"], 5, pyqucs.create_normal(0.18 * 1e-12) ),
                                                ( ["L2", "L4"], 5, pyqucs.uniform ),
                                                ( ["C3"],       5, pyqucs.create_normal(0.29 * 1e-12) ) ]:
     for c in components:
-        for n in [ netlist, netlist_original ]:
-            comp = netlist.circuit.get_component(c)
+        for n in [ netlist_original ]:
+            comp = netlist_original.circuit.get_component(c)
             comp.value.tolerance = tolerance
             comp.distribution = distribution
 
@@ -111,7 +106,7 @@ print "Sampling 100..."
 
 datakeeper = DataKeeper()
 
-percent_ok = sample(netlist, ["C1", "C5", "L2", "L4", "C3"], 100, callback=datakeeper)
+percent_ok = sample(netlist_realisation, ["C1", "C5", "L2", "L4", "C3"], 100, callback=datakeeper)
 
 print "%f %% OK" % (100.0*percent_ok)
 

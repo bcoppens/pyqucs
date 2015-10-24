@@ -1,6 +1,6 @@
 <Qucs Schematic 0.0.19>
 <Properties>
-  <View=11,-40,1304,1829,1,40,0>
+  <View=11,20,1304,1765,1,40,0>
   <Grid=10,10,1>
   <DataSet=LowPassFilterOriginal.dat>
   <DataDisplay=LowPassFilterOriginal.dpl>
@@ -25,11 +25,11 @@
   <Pac P2 1 1180 290 18 -26 0 1 "2" 1 "50 Ohm" 1 "0 dBm" 0 "1 GHz" 0 "26.85" 0>
   <Eqn dB 1 120 570 -28 15 0 0 "dBS21=dB(S[2,1])" 1 "dBS11=dB(S[1,1])" 1 "yes" 0>
   <.SP SP1 1 430 610 0 77 0 0 "lin" 1 "0 MHz" 1 "2GHz" 1 "201" 1 "no" 0 "1" 0 "2" 0 "no" 0 "no" 0>
-  <C C1 1 320 270 17 -26 0 1 "9pF" 1 "" 0 "neutral" 0>
   <L L2 1 490 110 -26 10 0 0 "21 nH" 1 "" 0>
   <C C3 1 680 270 17 -26 0 1 "14.3 pF" 1 "" 0 "neutral" 0>
   <L L4 1 790 110 -26 10 0 0 "21 nH" 1 "" 0>
-  <C C5 1 1000 270 17 -26 0 1 "9pF" 1 "" 0 "neutral" 0>
+  <C C5 1 1000 270 17 -26 0 1 "9 pF" 1 "" 0 "neutral" 0>
+  <C C1 1 320 270 17 -26 0 1 "9 pF" 1 "" 0 "neutral" 0>
 </Components>
 <Wires>
   <120 320 120 420 "" 0 0 0 "">
