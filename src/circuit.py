@@ -73,13 +73,20 @@ class Value:
 
             # Try to parse some suffixes. Doesn't parse them all, though... (in particular, when a unit partially prefix overlaps with a unit, like f(emto) and f(eet) TODO?)
             suffixes = "".join(s[1:])
+            skip_next = 0
+
             for pos, char in enumerate(suffixes):
+                if skip_next > 0:
+                    skip_next -= 1
+                    continue
 
                 # For now, this allows for multiple unit prefixes and units combined...
                 if char == "O" and suffixes[pos:pos+3] == "Ohm":
                     self.unit = "Ohm"
+                    skip_next = 2
                 elif char == "H" and suffixes[pos:pos+2] == "Hz":
                     self.unit = "Hz"
+                    skip_next = 1
                 elif char in unitprefixes:
                     self.value = unitprefixes[char] * self.value
                 elif char in units:
