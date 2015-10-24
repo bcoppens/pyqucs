@@ -47,6 +47,7 @@ for c in ["C1", "C3", "C5"]:
 
 for l in ["L2", "L4"]:
     physical.model_inductor(netlist_realisation, l, R_P = "100 M", R_S = "0", C_P = "0")
+    #physical.model_inductor_Q_SRF(netlist_realisation, l, R_S = 0.1, Q = 12, SRF = 1000e+06)
 
 # TODO: look at the trick from the qucs test cases to wrap the simulation data into multi-dimensional arrays?
 

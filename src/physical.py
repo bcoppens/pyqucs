@@ -61,3 +61,12 @@ def model_inductor(netlist, inductor, R_P, R_S, C_P):
 
     r_p = netlist.circuit.next_internal_name_for("R_P")
     netlist.circuit.add(circuit.Resistor(r_p, R_P, None, net_begin, net_end))
+
+# Replace an inductor with a set of passive components, where the values are automatically derived from a Q factor (TODO: over a frequency range?), and the self-resonant frequency
+def model_inductor_Q_SRF(netlist, inductor, R_S, Q, SRF):
+    l = netlist.circuit.get_component(inductor)
+
+    R_P = Q * (2 * math.pi * SRF * l.value.value)
+    C_P = 1 / ( ((2 * math.pi * SRF) ** 2) * l.value.value)
+
+    model_inductor(netlist, inductor, R_P, R_S, C_P)
