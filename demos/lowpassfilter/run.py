@@ -30,22 +30,28 @@ netlist_realisation = copy.deepcopy(netlist_original)
 # Use component values from a standard set of components
 physical.realise_with_library_components(netlist_realisation)
 
+# If they would have been decently labeled, this was easier:
+#capacitors = [ ("C%i" % i) for i in range(1, 5) ]
+#inductors = [ ("L%i" % i) for i in range(1, 6) ]
+capacitors = [ "C1", "C3", "C5" ]
+inductors = [ "L2", "L4" ]
+
 # Set tolerances and distributions, ideally these would already be set in the library, though
-for (components, tolerance, distribution) in [ ( ["C1", "C5"], 5, pyqucs.create_normal(0.18 * 1e-12) ),
-                                               ( ["L2", "L4"], 5, pyqucs.uniform ),
-                                               ( ["C3"],       5, pyqucs.create_normal(0.29 * 1e-12) ) ]:
+# TODO: make the normal tolerances be centered with an appropriately scaled sigma, like so: pyqucs.create_normal(0.18 * 1e-12) ?
+for (components, tolerance, distribution) in [ ( capacitors, 5, pyqucs.uniform ),
+                                               ( inductors, 5, pyqucs.uniform ) ]:
     for c in components:
         for n in [ netlist_realisation ]:
             comp = netlist_realisation.circuit.get_component(c)
             comp.value.tolerance = tolerance
             comp.distribution = distribution
 
-for c in ["C1", "C3", "C5"]:
+for c in capacitors:
     # Use on purpose a more leaky capacitor, so the difference shows up in the graphs :)
-    physical.model_capacitor(netlist_realisation, c, R_L = "10 k", R_ESR = "0", L_ESL = "0")
+    physical.model_capacitor(netlist_realisation, c, R_L = "10 k", R_ESR = "0.1", L_ESL = "0")
 
-for l in ["L2", "L4"]:
-    physical.model_inductor(netlist_realisation, l, R_P = "100 M", R_S = "0", C_P = "0")
+for l in inductors:
+    physical.model_inductor(netlist_realisation, l, R_P = "100 M", R_S = "0.1", C_P = "0")
     #physical.model_inductor_Q_SRF(netlist_realisation, l, R_S = 0.1, Q = 12, SRF = 1000e+06)
 
 # TODO: look at the trick from the qucs test cases to wrap the simulation data into multi-dimensional arrays?
@@ -110,7 +116,7 @@ print "Sampling 100..."
 
 datakeeper = DataKeeper()
 
-percent_ok = sample(netlist_realisation, ["C1", "C5", "L2", "L4", "C3"], 100, callback=datakeeper)
+percent_ok = sample(netlist_realisation, capacitors + inductors, 100, callback=datakeeper)
 
 print "%f %% OK" % (100.0*percent_ok)
 
@@ -118,9 +124,12 @@ fig, axes = plot.subplots()
 
 for dataset in datakeeper.datasets:
     plot.plot(dataset["frequency"], dataset["dBS21"], color='grey', alpha=0.5, marker=None, hold=True)
+    plot.plot(dataset["frequency"], dataset["dBS11"], color='green', alpha=0.5, marker=None, hold=True)
 
 plot.plot(orig_data[0], orig_data[1], color='black', marker='.', hold=True)
 plot.plot(realisation_data[0], realisation_data[1], color='blue', marker='.', hold=True)
+
+plot.axvline(x=500e6, color='red', hold=True, linewidth=2)
 
 plot.ylim(-2, 0)
 
