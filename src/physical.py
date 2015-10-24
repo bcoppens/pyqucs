@@ -11,26 +11,82 @@ def value_with_tolerance_if_not_set(v, tolerance):
         return circuit.Value(v, tolerance)
     return v
 
+# These do not inherit from circuit.Inductor etc, because they're not actually in the circuit, but part of the library. And then the original circuit.Inductor
+# can get substituted with a suitable set of components defined by these models.
+class Model():
+    def realise(self, netlist, component):
+        pass
+
+class SimpleModel():
+    def __init__(self, value, name=None):
+        self.name = name
+        self.value = value
+
+    def realise(self, netlist, component):
+        pass
+
+    def __str__(self):
+        if self.name is not None:
+            return "%s (%s)" % (self.value.to_netlist(), self.name)
+        return "%s" % (self.value.to_netlist())
+
+class InductorModel(SimpleModel):
+    pass
+class CapacitorModel(SimpleModel):
+    pass
+
+class PhysicalInductor(InductorModel):
+    def __init__(self, name, value, R_S, Q, SRF):
+        self.name = name
+        self.value = value
+        self.R_S = R_S
+        self.Q = Q
+        self.SRF = SRF
+
+    def realise(self, netlist, component):
+        model_inductor_Q_SRF(netlist, component, self.R_S, self.Q, self.SRF)
+
 # Standard inductor/capacitor values come in a limited set of multiples of these values. Generate a few of those with a tolerance of 5%
 standard_inductor_values = []
 standard_capacitor_values = []
 
 for prefix in [1e-06, 1e-09, 1e-12]:
     for v in [10, 15, 18, 22, 27, 33, 47, 51, 68, 75, 82, 91]:
-        standard_capacitor_values.append(circuit.Value(prefix * v, tolerance=5))
-        standard_inductor_values.append(circuit.Value(prefix * v, tolerance=5))
+        standard_capacitor_values.append(CapacitorModel(circuit.Value(prefix * v, tolerance=5)))
+        standard_inductor_values.append(InductorModel(circuit.Value(prefix * v, tolerance=5)))
 
-def find_closest_value(target, list):
-    return min(list, key=lambda value: abs(value.value - target)) # Sort by absolute distance to v, and return the minimum value
+def find_closest_component_model(target, list):
+    return min(list, key=lambda model: abs(model.value.value - target)) # Sort by absolute distance to v, and return the minimum value
 
-def realise_with_library_components(netlist, capacitor_library=standard_capacitor_values, inductor_library=standard_inductor_values):
+def map_library_components(netlist, capacitor_library=standard_capacitor_values, inductor_library=standard_inductor_values):
+    component_map = {}
+
     for component_name in netlist.circuit.components:
         component = netlist.circuit.components[component_name]
 
         if isinstance(component, circuit.Capacitor):
-            component.value = find_closest_value(component.value.value, capacitor_library)
+            component_map[component_name] = find_closest_component_model(component.value.value, capacitor_library)
         if isinstance(component, circuit.Inductor):
-            component.value = find_closest_value(component.value.value, inductor_library)
+            component_map[component_name] = find_closest_component_model(component.value.value, capacitor_library)
+
+    return component_map
+
+def print_library_map(netlist, component_map):
+    for component_name, replacement in component_map.iteritems():
+        print "Mapped %s from %s to %s" % (component_name, netlist.circuit.components[component_name].value.to_netlist(), str(replacement))
+
+def substitute_library_components(netlist, component_map):
+    for component_name in component_map:
+        component = netlist.circuit.components[component_name]
+        component.value = component_map[component_name].value
+
+def realise_components(netlist, component_map):
+    for component_name in component_map:
+        component_map[component_name].realise(netlist, component_name)
+
+def model_components(netlist, component_map):
+    substitute_library_components(netlist, component_map)
+    realise_components(netlist, component_map)
 
 # Replace a capacitor in a netlist with set of passive components that model capacitor leakage R_L, equivalent series resistance R_ESR and equivalent series inductance L_ESL
 def model_capacitor(netlist, capacitor, R_L, R_ESR, L_ESL):

@@ -28,7 +28,11 @@ netlist_original = qucsator.Netlist(base_file_original + ".net")
 netlist_realisation = copy.deepcopy(netlist_original)
 
 # Use component values from a standard set of components
-physical.realise_with_library_components(netlist_realisation)
+library_components = physical.map_library_components(netlist_realisation)
+physical.print_library_map(netlist_realisation, library_components)
+
+physical.substitute_library_components(netlist_realisation, library_components)
+
 
 # If they would have been decently labeled, this was easier:
 #capacitors = [ ("C%i" % i) for i in range(1, 5) ]

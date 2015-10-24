@@ -4,7 +4,7 @@ import re
 
 import pyqucs
 
-class RawComponent():
+class RawComponent(object):
     def __init__(self, str):
         self.name = "<RAW_COMPONENT>"
         self.str = str
@@ -22,7 +22,7 @@ class RawComponent():
     def __str__(self):
         return "Raw: '%s'" % self.str
 
-class SimpleComponent():
+class SimpleComponent(object):
     # All the other properties are optional, so leave those out for now. Subclasses should override this once optional parameters
     # are supported that differ across components, and I should probably define some kind of setter-method rather than hardcode it in the constructor
     base_string = '%s:%s %%s %%s %s="%%s"\n'
