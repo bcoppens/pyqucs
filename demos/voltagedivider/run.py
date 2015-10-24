@@ -68,7 +68,7 @@ def sensitivity(netlist, component_name, sweep_components, trials_per_value):
     x_vals = []
     y_vals = []
 
-    for comp_val in pyqucs.equally_spaced(sampled_component, 20): # This range is created before the component value is updated
+    for comp_val in pyqucs.equally_spaced(sampled_component.value, 20): # This range is created before the component value is updated
         component.value.value = comp_val
 
         sampled_net = pyqucs.netlist_for_sampling(net)

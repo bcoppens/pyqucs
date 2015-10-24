@@ -44,7 +44,7 @@ for (components, tolerance, distribution) in [ ( capacitors, 5, pyqucs.uniform )
         for n in [ netlist_realisation ]:
             comp = netlist_realisation.circuit.get_component(c)
             comp.value.tolerance = tolerance
-            comp.distribution = distribution
+            comp.value.distribution = distribution
 
 for c in capacitors:
     # Use on purpose a more leaky capacitor, so the difference shows up in the graphs :)

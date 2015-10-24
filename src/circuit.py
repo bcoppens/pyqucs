@@ -2,10 +2,15 @@ import copy
 import numbers
 import re
 
+import pyqucs
+
 class RawComponent():
     def __init__(self, str):
         self.name = "<RAW_COMPONENT>"
         self.str = str
+
+    def sample(self, nr_samples=1):
+        pass
 
     # See the comment at the top of pyqucs.py
     def initialize_nominal_value(self):
@@ -24,6 +29,9 @@ class SimpleComponent():
 
     def initialize_nominal_value(self):
         self.nominal_value = copy.deepcopy(self.value) # TODO, sigh
+
+    def sample(self, nr_samples=1):
+        return self.nominal_value.sample(nr_samples)
 
     def __init__(self, name, value, str, port1, port2):
         if str is None:
@@ -52,8 +60,12 @@ unitprefixes = { "E": 1e+18, "P": 1e+15, "T": 1e+12, "G": 1e+09, "M": 1e+06, "k"
 units = set({"S", "s", "K", "H", "F", "Hz", "V", "A", "W", "m"})
 
 class Value:
-    def __init__(self, v, tolerance=0):
+    def sample(self, nr_samples=1):
+        return self.distribution(self, nr_samples)
+
+    def __init__(self, v, tolerance=0, distribution=pyqucs.uniform):
         self.tolerance = tolerance
+        self.distribution = distribution
         self.unit = ""
         self.symbolic = False
 
