@@ -11,6 +11,27 @@ def value_with_tolerance_if_not_set(v, tolerance):
         return circuit.Value(v, tolerance)
     return v
 
+# Standard inductor/capacitor values come in a limited set of multiples of these values. Generate a few of those with a tolerance of 5%
+standard_inductor_values = []
+standard_capacitor_values = []
+
+for prefix in [1e-06, 1e-09, 1e-12]:
+    for v in [10, 15, 18, 22, 27, 33, 47, 51, 68, 75, 82, 91]:
+        standard_capacitor_values.append(circuit.Value(prefix * v, tolerance=5))
+        standard_inductor_values.append(circuit.Value(prefix * v, tolerance=5))
+
+def find_closest_value(target, list):
+    return min(list, key=lambda value: abs(value.value - target)) # Sort by absolute distance to v, and return the minimum value
+
+def realise_with_library_components(netlist, capacitor_library=standard_capacitor_values, inductor_library=standard_inductor_values):
+    for component_name in netlist.circuit.components:
+        component = netlist.circuit.components[component_name]
+
+        if isinstance(component, circuit.Capacitor):
+            component.value = find_closest_value(component.value.value, capacitor_library)
+        if isinstance(component, circuit.Inductor):
+            component.value = find_closest_value(component.value.value, inductor_library)
+
 # Replace a capacitor in a netlist with set of passive components that model capacitor leakage R_L, equivalent series resistance R_ESR and equivalent series inductance L_ESL
 def model_capacitor(netlist, capacitor, R_L, R_ESR, L_ESL):
     c = netlist.circuit.get_component(capacitor)

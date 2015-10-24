@@ -24,18 +24,22 @@ schematic_original.to_netlist(base_file_original+ ".net")
 
 netlist_original = qucsator.Netlist(base_file_original + ".net")
 
-# Set tolerances and distributions
+# Now make this physical
+netlist_realisation = copy.deepcopy(netlist_original)
+
+# Use component values from a standard set of components
+physical.realise_with_library_components(netlist_realisation)
+
+# Set tolerances and distributions, ideally these would already be set in the library, though
 for (components, tolerance, distribution) in [ ( ["C1", "C5"], 5, pyqucs.create_normal(0.18 * 1e-12) ),
                                                ( ["L2", "L4"], 5, pyqucs.uniform ),
                                                ( ["C3"],       5, pyqucs.create_normal(0.29 * 1e-12) ) ]:
     for c in components:
-        for n in [ netlist_original ]:
-            comp = netlist_original.circuit.get_component(c)
+        for n in [ netlist_realisation ]:
+            comp = netlist_realisation.circuit.get_component(c)
             comp.value.tolerance = tolerance
             comp.distribution = distribution
 
-# Now make this physical
-netlist_realisation = copy.deepcopy(netlist_original)
 for c in ["C1", "C3", "C5"]:
     # Use on purpose a more leaky capacitor, so the difference shows up in the graphs :)
     physical.model_capacitor(netlist_realisation, c, R_L = "10 k", R_ESR = "0", L_ESL = "0")
