@@ -3,8 +3,6 @@ import copy
 import numpy as np
 import sys
 
-import qucsator
-
 # We want 2 different 'versions' of a circuit:
 # * The version that the user created, with the specified nominal values
 # * A random sample of that circuit, given the specified tolerances of that user-created circuit
@@ -62,13 +60,3 @@ def set_component_to_random_sample(netlist, component_name):
     sampler = getattr(component, "distribution", uniform)
 
     component.value.value = sampler(component, 1)[0]
-
-if __name__ == "__main__":
-    config = ConfigParser.SafeConfigParser()
-    config.read('pyqucs.cfg')
-
-    netlist = qucsator.Netlist("FMLowPass.net")
-    print netlist.circuit
-
-    sim = qucsator.Simulation(config)
-    sim.simulate(netlist)
