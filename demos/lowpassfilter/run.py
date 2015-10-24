@@ -30,9 +30,9 @@ netlist_original = qucsator.Netlist(base_file_original + ".net")
 netlist = qucsator.Netlist(base_file_modified + ".net")
 
 # Set tolerances and distributions
-for (components, tolerance, distribution) in [ ( ["C1", "C5"], 5, pyqucs.create_normal(0.18) ),
+for (components, tolerance, distribution) in [ ( ["C1", "C5"], 5, pyqucs.create_normal(0.18 * 1e-12) ),
                                                ( ["L2", "L4"], 5, pyqucs.uniform ),
-                                               ( ["C3"],       5, pyqucs.create_normal(0.29) ) ]:
+                                               ( ["C3"],       5, pyqucs.create_normal(0.29 * 1e-12) ) ]:
     for c in components:
         for n in [ netlist, netlist_original ]:
             comp = netlist.circuit.get_component(c)

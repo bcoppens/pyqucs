@@ -61,7 +61,6 @@ class Value:
         # TODO: with a regex, perhaps? But this definitely suffices for now
         try:
             self.unit = ""
-            self.prefix = ""
             self.value = float(s[0])
 
             # Try to parse some suffixes. Doesn't parse them all, though... (in particular, when a unit partially prefix overlaps with a unit, like f(emto) and f(eet) TODO?)
@@ -74,7 +73,7 @@ class Value:
                 elif char == "H" and suffixes[pos:pos+2] == "Hz":
                     self.unit = "Hz"
                 elif char in unitprefixes:
-                    self.prefix = char
+                    self.value = unitprefixes[char] * self.value
                 elif char in units:
                     self.unit = char
                 else:
@@ -87,7 +86,7 @@ class Value:
             self.symbolic = True
 
     def to_netlist(self):
-        return " ".join([str(self.value)] + [self.prefix, self.unit])
+        return " ".join([str(self.value)] + [self.unit])
 
 class Circuit:
     def __init__(self):
