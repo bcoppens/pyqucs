@@ -1,4 +1,5 @@
 import copy
+import numbers
 import re
 
 class RawComponent():
@@ -51,16 +52,23 @@ unitprefixes = { "E": 1e+18, "P": 1e+15, "T": 1e+12, "G": 1e+09, "M": 1e+06, "k"
 units = set({"S", "s", "K", "H", "F", "Hz", "V", "A", "W", "m"})
 
 class Value:
-    def __init__(self, str, tolerance=0):
+    def __init__(self, v, tolerance=0):
+        self.tolerance = tolerance
+        self.unit = ""
+        self.symbolic = False
+
+        if isinstance(v, float) or isinstance(v, numbers.Integral):
+            self.value = v
+            return
+
+        str = v
+
         # TODO very poor man's parsing, but suffices for now, in the end I might want to make an actual parser here
         # This means that the suffixes should be split from the value by spaces for now...
         s = str.split(" ")
 
-        self.tolerance = tolerance
-
         # TODO: with a regex, perhaps? But this definitely suffices for now
         try:
-            self.unit = ""
             self.value = float(s[0])
 
             # Try to parse some suffixes. Doesn't parse them all, though... (in particular, when a unit partially prefix overlaps with a unit, like f(emto) and f(eet) TODO?)
@@ -79,7 +87,6 @@ class Value:
                 else:
                     print "Warning: Unknown suffix '%s' in '%s'" % (char, str)
 
-            self.symbolic = False
         except ValueError:
             # It wasn't a valid floating point value, so assume it's a symbolic reference
             self.value = str
