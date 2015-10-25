@@ -67,7 +67,7 @@ def map_library_components(netlist, capacitor_library=standard_capacitor_values,
         if isinstance(component, circuit.Capacitor):
             component_map[component_name] = find_closest_component_model(component.value.value, capacitor_library)
         if isinstance(component, circuit.Inductor):
-            component_map[component_name] = find_closest_component_model(component.value.value, capacitor_library)
+            component_map[component_name] = find_closest_component_model(component.value.value, inductor_library)
 
     return component_map
 

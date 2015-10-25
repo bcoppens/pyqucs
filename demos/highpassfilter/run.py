@@ -27,16 +27,34 @@ netlist_original = qucsator.Netlist(base_file_original + ".net")
 # Now make this physical
 netlist_realisation = copy.deepcopy(netlist_original)
 
-# Use component values from a standard set of components
-coilcraft_0603hp = [ circuit.Value(1e-09 * v, tolerance=2) for v in [23, 24, 27, 39, 43] ]
+# A subset of more specialised components:
+coilcraft_0603hp = [
+    physical.PhysicalInductor("0603HP-23NXGL", circuit.Value(23e-09, tolerance=2), R_S=0.183, Q=40, SRF=3.00e9),
+    physical.PhysicalInductor("0603HP-24NXGL", circuit.Value(24e-09, tolerance=2), R_S=0.074, Q=42, SRF=2.95e9),
+    physical.PhysicalInductor("0603HP-27NXGL", circuit.Value(27e-09, tolerance=2), R_S=0.150, Q=44, SRF=2.80e9),
+    physical.PhysicalInductor("0603HP-39NXGL", circuit.Value(39e-09, tolerance=2), R_S=0.19,  Q=48, SRF=2.45e9),
+    physical.PhysicalInductor("0603HP-43NXGL", circuit.Value(43e-09, tolerance=2), R_S=0.17,  Q=45, SRF=2.45e9)
+]
+coilcraft_sq = [
+    physical.PhysicalInductor("0806SQ-16NGL", circuit.Value(15.7e-09, tolerance=2), R_S=0.009, Q=90, SRF=4.4e9),
+    physical.PhysicalInductor("0806SQ-19NGL", circuit.Value(19.4e-09, tolerance=2), R_S=0.010, Q=90, SRF=4.0e9),
 
-library_components = physical.map_library_components(netlist_realisation, inductor_library=coilcraft_0603hp)
+    physical.PhysicalInductor("0807SQ-17NGL", circuit.Value(17.0e-09, tolerance=2), R_S=0.009, Q=100, SRF=4.0e9),
+    physical.PhysicalInductor("0908SQ-17NGL", circuit.Value(16.6e-09, tolerance=2), R_S=0.008, Q=130, SRF=3.4e9),
+
+    physical.PhysicalInductor("0908SQ-25NGL", circuit.Value(25.0e-09, tolerance=2), R_S=0.010, Q=130, SRF=2.5e9),
+    physical.PhysicalInductor("0908SQ-28NGL", circuit.Value(27.3e-09, tolerance=2), R_S=0.010, Q=130, SRF=3.2e9),
+]
+
+coilcraft = coilcraft_0603hp + coilcraft_sq
+
+library_components = physical.map_library_components(netlist_realisation, inductor_library=coilcraft)
 physical.print_library_map(netlist_realisation, library_components)
 
 physical.substitute_library_components(netlist_realisation, library_components)
 
-capacitors = [ ("C%i" % i) for i in range(1, 5) ]
-inductors = [ ("L%i" % i) for i in range(1, 6) ]
+capacitors = [ ("C%i" % i) for i in range(1, 7) ]
+inductors = [ ("L%i" % i) for i in range(1, 8) ]
 
 # Set tolerances and distributions, ideally these would already be set in the library, though
 # TODO: make the normal tolerances be centered with an appropriately scaled sigma, like so: pyqucs.create_normal(0.18 * 1e-12) ?
@@ -60,18 +78,13 @@ for l in inductors:
 
 def acceptable_circuit(sim):
     for (idx, freq) in enumerate(sim.data["frequency"]):
-        # Passband: 0-500MHz
-        if freq <= 500e6:
+        # Passband: after 137MHz
+        if freq >= 137e6:
             if sim.data["dBS21"][idx] <= -1.5:
                 return False
-            if abs(sim.data["S[1,1]"][idx]) >= 0.33:
-                return False
-            if abs(sim.data["S[2,2]"][idx]) >= 0.33:
-                return False
-        # Stopband: 1GHz-3GHz (the S-parameter sweep only goes to 2GHz actually)
-        # TODO something is wrong here!
-        #elif freq >= 1e9 and freq <= 3e9:
-        #    if sim.data["dBS21"][idx] >= -40:
+        # Stopband: below 110MHz
+        if freq <= 110e6:
+            if sim.data["dBS21"][idx] >= -10:
                 return False
     return True
 
