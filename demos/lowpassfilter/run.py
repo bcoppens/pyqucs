@@ -40,23 +40,9 @@ physical.substitute_library_components(netlist_realisation, library_components)
 capacitors = [ "C1", "C3", "C5" ]
 inductors = [ "L2", "L4" ]
 
-# Set tolerances and distributions, ideally these would already be set in the library, though
-# TODO: make the normal tolerances be centered with an appropriately scaled sigma, like so: pyqucs.create_normal(0.18 * 1e-12) ?
-for (components, tolerance, distribution) in [ ( capacitors, 5, pyqucs.uniform ),
-                                               ( inductors, 5, pyqucs.uniform ) ]:
-    for c in components:
-        for n in [ netlist_realisation ]:
-            comp = netlist_realisation.circuit.get_component(c)
-            comp.value.tolerance = tolerance
-            comp.value.distribution = distribution
-
 for c in capacitors:
     # Use on purpose a more leaky capacitor, so the difference shows up in the graphs :)
     physical.model_capacitor(netlist_realisation, c, R_L = "10 k", R_ESR = "0.1", L_ESL = "0")
-
-for l in inductors:
-    physical.model_inductor(netlist_realisation, l, R_P = "100 M", R_S = "0.1", C_P = "0")
-    #physical.model_inductor_Q_SRF(netlist_realisation, l, R_S = 0.1, Q = 12, SRF = 1000e+06)
 
 # TODO: look at the trick from the qucs test cases to wrap the simulation data into multi-dimensional arrays?
 
