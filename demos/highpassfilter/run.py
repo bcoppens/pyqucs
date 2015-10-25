@@ -35,6 +35,7 @@ coilcraft_0603hp = [
     physical.PhysicalInductor("0603HP-39NXGL", circuit.Value(39e-09, tolerance=2), R_S=0.19,  Q=48, SRF=2.45e9),
     physical.PhysicalInductor("0603HP-43NXGL", circuit.Value(43e-09, tolerance=2), R_S=0.17,  Q=45, SRF=2.45e9)
 ]
+
 coilcraft_sq = [
     physical.PhysicalInductor("0806SQ-16NGL", circuit.Value(15.7e-09, tolerance=2), R_S=0.009, Q=90, SRF=4.4e9),
     physical.PhysicalInductor("0806SQ-19NGL", circuit.Value(19.4e-09, tolerance=2), R_S=0.010, Q=90, SRF=4.0e9),
@@ -49,7 +50,12 @@ coilcraft_sq = [
 
 coilcraft = coilcraft_0603hp + coilcraft_sq
 
-library_components = physical.map_library_components(netlist_realisation, inductor_library=coilcraft)
+murata = [
+    physical.CapacitorModel(circuit.Value(18e-12, tolerance="1"), name="GRM1885C1H180FA01D"),
+    physical.CapacitorModel(circuit.Value(20e-12, tolerance="1"), name="GRM1885C1H200FA01D")
+]
+
+library_components = physical.map_library_components(netlist_realisation, inductor_library=coilcraft, capacitor_library=murata)
 physical.print_library_map(netlist_realisation, library_components)
 
 physical.substitute_library_components(netlist_realisation, library_components)
@@ -57,19 +63,9 @@ physical.substitute_library_components(netlist_realisation, library_components)
 capacitors = [ ("C%i" % i) for i in range(1, 7) ]
 inductors = [ ("L%i" % i) for i in range(1, 8) ]
 
-# Set tolerances and distributions, ideally these would already be set in the library, though
-# TODO: make the normal tolerances be centered with an appropriately scaled sigma, like so: pyqucs.create_normal(0.18 * 1e-12) ?
-for (components, tolerance, distribution) in [ ( capacitors, 5, pyqucs.uniform ),
-                                               ( inductors, 2, pyqucs.uniform ) ]:
-    for c in components:
-        for n in [ netlist_realisation ]:
-            comp = netlist_realisation.circuit.get_component(c)
-            comp.value.tolerance = tolerance
-            comp.value.distribution = distribution
-
 for c in capacitors:
     # Use on purpose a more leaky capacitor, so the difference shows up in the graphs :)
-    physical.model_capacitor(netlist_realisation, c, R_L = "10 k", R_ESR = "0.1", L_ESL = "0")
+    physical.model_capacitor(netlist_realisation, c, R_L = "10 k", R_ESR = "0.1", L_ESL = "1 nH")
 
 # TODO: look at the trick from the qucs test cases to wrap the simulation data into multi-dimensional arrays?
 
@@ -81,7 +77,7 @@ def acceptable_circuit(sim):
                 return False
         # Stopband: below 110MHz
         if freq <= 110e6:
-            if sim.data["dBS21"][idx] >= -10:
+            if sim.data["dBS21"][idx] >= -15:
                 return False
     return True
 
