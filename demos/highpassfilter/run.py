@@ -40,8 +40,9 @@ coilcraft_sq = [
     physical.PhysicalInductor("0806SQ-19NGL", circuit.Value(19.4e-09, tolerance=2), R_S=0.010, Q=90, SRF=4.0e9),
 
     physical.PhysicalInductor("0807SQ-17NGL", circuit.Value(17.0e-09, tolerance=2), R_S=0.009, Q=100, SRF=4.0e9),
-    physical.PhysicalInductor("0908SQ-17NGL", circuit.Value(16.6e-09, tolerance=2), R_S=0.008, Q=130, SRF=3.4e9),
+    physical.PhysicalInductor("0807SQ-22NGL", circuit.Value(22.0e-09, tolerance=2), R_S=0.010, Q=100, SRF=3.5e9),
 
+    physical.PhysicalInductor("0908SQ-17NGL", circuit.Value(16.6e-09, tolerance=2), R_S=0.008, Q=130, SRF=3.4e9),
     physical.PhysicalInductor("0908SQ-25NGL", circuit.Value(25.0e-09, tolerance=2), R_S=0.010, Q=130, SRF=2.5e9),
     physical.PhysicalInductor("0908SQ-28NGL", circuit.Value(27.3e-09, tolerance=2), R_S=0.010, Q=130, SRF=3.2e9),
 ]
@@ -70,17 +71,13 @@ for c in capacitors:
     # Use on purpose a more leaky capacitor, so the difference shows up in the graphs :)
     physical.model_capacitor(netlist_realisation, c, R_L = "10 k", R_ESR = "0.1", L_ESL = "0")
 
-for l in inductors:
-    #physical.model_inductor(netlist_realisation, l, R_P = "100 M", R_S = "0.1", C_P = "0")
-    physical.model_inductor_Q_SRF(netlist_realisation, l, R_S = 0.2, Q = 30, SRF = 2000e+06)
-
 # TODO: look at the trick from the qucs test cases to wrap the simulation data into multi-dimensional arrays?
 
 def acceptable_circuit(sim):
     for (idx, freq) in enumerate(sim.data["frequency"]):
         # Passband: after 137MHz
         if freq >= 137e6:
-            if sim.data["dBS21"][idx] <= -1.5:
+            if sim.data["dBS21"][idx] <= -1:
                 return False
         # Stopband: below 110MHz
         if freq <= 110e6:
